@@ -2,6 +2,7 @@ package com.example.clima;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -71,6 +72,9 @@ public class WeatherController extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                Intent myIntent = new Intent(WeatherController.this, ChangeCityController.class);
+                startActivity(myIntent);
+
             }
         });
 
@@ -82,12 +86,25 @@ public class WeatherController extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume() is called.");
-        Log.d(TAG, "onResume: Getting weather from current location.");
-        getWeatherForCurrentLocation();
+        Intent myIntent = getIntent();
+        String cityName = myIntent.getStringExtra("City");
+        if (cityName != null) {
+            getWeatherForNewCity(cityName);
+        } else {
+            Log.d(TAG, "onResume: Getting weather from current location.");
+            getWeatherForCurrentLocation();
+        }
+
     }
 
 
     // TODO: Add getWeatherForNewCity(String city) here:
+    private void getWeatherForNewCity(String city) {
+        RequestParams params = new RequestParams();
+        params.put("q", city);
+        params.put("appid", APP_ID);
+        letsDoSomeNetworking(params);
+    }
 
 
     // TODO: Add getWeatherForCurrentLocation() here:
@@ -193,5 +210,9 @@ public class WeatherController extends AppCompatActivity {
     // TODO: Add onPause() here:
 
 
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mLocationManager != null) mLocationManager.removeUpdates(mLocationListener);
+    }
 }
